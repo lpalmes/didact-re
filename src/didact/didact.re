@@ -16,11 +16,12 @@ module Callback = {
 type props = {
   id: option(string),
   value: option(string),
+  className: option(string),
+  placeholder: option(string),
   onClick: option(Dom.event => unit),
+  onKeyDown: option(Dom.event => unit),
   onChange: option(Dom.event => unit)
 };
-
-let defaultProps = {id: None, value: None, onClick: None, onChange: None};
 
 type reduce('payload, 'action) = ('payload => 'action) => Callback.t('payload);
 
@@ -50,17 +51,38 @@ and componentSpec('state, 'initialState, 'action) = {
 }
 and component('state, 'action) = componentSpec('state, 'state, 'action);
 
+let defaultProps = {
+  id: None,
+  value: None,
+  placeholder: None,
+  className: None,
+  onClick: None,
+  onChange: None,
+  onKeyDown: None
+};
+
 let createDomElement =
     (
       name,
       ~onClick: option(Dom.event => unit)=?,
+      ~onChange: option(Dom.event => unit)=?,
+      ~onKeyDown: option(Dom.event => unit)=?,
+      ~id: option(string)=?,
+      ~value: option(string)=?,
+      ~className: option(string)=?,
+      ~placeholder: option(string)=?,
       ~children: list(didactElement),
       _: unit
     ) => {
   elementType: Node(name),
   props: {
-    ...defaultProps,
-    onClick
+    className,
+    onClick,
+    onChange,
+    onKeyDown,
+    placeholder,
+    value,
+    id
   },
   children
 };
@@ -83,6 +105,18 @@ let reducerComponent = debugName => basicComponent(debugName);
 
 let stringToElement = value => {
   elementType: Text(value),
+  props: defaultProps,
+  children: []
+};
+
+let listToElement = elements => {
+  elementType: Node("div"),
+  props: defaultProps,
+  children: elements
+};
+
+let nullElement = {
+  elementType: Node("div"),
   props: defaultProps,
   children: []
 };

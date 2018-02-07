@@ -7,14 +7,19 @@
     "clean": "bsb -clean-world",
     "bundle": "parcel -o src/index.html"
   },
-  "keywords": ["BuckleScript"],
+  "keywords": [
+    "BuckleScript"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "bs-platform": "^2.1.0"
   },
   "dependencies": {
+    "bs-nice": "git+https://github.com/threepointone/bs-nice.git",
     "bs-webapi": "^0.7.0",
-    "parcel-bundler": "^1.4.1"
+    "parcel-bundler": "^1.4.1",
+    "todomvc-app-css": "^2.1.0",
+    "todomvc-common": "^1.0.4"
   }
 }

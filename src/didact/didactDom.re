@@ -21,7 +21,7 @@ and didactInstance =
 
 module Reconciler = {
   let addProps = (domElement: Dom.element, props) => {
-    open Bs_webapi.Dom;
+    open Webapi.Dom;
     switch props.id {
     | Some(value) => ElementRe.setAttribute("id", value, domElement)
     | None => ()
@@ -34,8 +34,20 @@ module Reconciler = {
     | Some(func) => Element.addEventListener("click", func, domElement)
     | None => ()
     };
+    switch props.onKeyDown {
+    | Some(func) => Element.addEventListener("keyDown", func, domElement)
+    | None => ()
+    };
     switch props.onChange {
-    | Some(func) => Element.addEventListener("change", func, domElement)
+    | Some(func) => Element.addEventListener("input", func, domElement)
+    | None => ()
+    };
+    switch props.className {
+    | Some(value) => ElementRe.setAttribute("class", value, domElement)
+    | None => ()
+    };
+    switch props.placeholder {
+    | Some(value) => ElementRe.setAttribute("placeholder", value, domElement)
     | None => ()
     };
   };
@@ -50,7 +62,7 @@ module Reconciler = {
     | ComponentInstance(Instance({dom})) => dom^
     };
   let rec instantiate = (element: didactElement) : didactInstance => {
-    open Bs_webapi.Dom;
+    open Webapi.Dom;
     let instance =
       switch element.elementType {
       | Node(name) =>
@@ -101,7 +113,7 @@ module Reconciler = {
               instance: option(didactInstance),
               didactElement: option(didactElement)
             ) =>
-      Bs_webapi.Dom.(
+      Webapi.Dom.(
         switch (instance, didactElement) {
         | (None, Some(didactElement)) =>
           let newInstance = instantiate(didactElement);
@@ -154,7 +166,7 @@ module Reconciler = {
   }
   and createSelf = instance : self(_) => {
     let Instance(instance) = instance;
-    Bs_webapi.Dom.{
+    Webapi.Dom.{
       state: Obj.magic(instance.iState),
       reduce: (payloadToAction, payload) => {
         let action = payloadToAction(payload);
@@ -189,10 +201,7 @@ module Reconciler = {
     let iState = component.initialState();
     Instance({
       component,
-      dom:
-        ref(
-          Bs_webapi.Dom.Document.createElement("span", Bs_webapi.Dom.document)
-        ),
+      dom: ref(Webapi.Dom.Document.createElement("span", Webapi.Dom.document)),
       element,
       childInstance: ref(None),
       iState,

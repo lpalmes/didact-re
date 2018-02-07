@@ -14,13 +14,25 @@ function addProps(domElement, props) {
   if (match$1) {
     domElement.setAttribute("value", match$1[0]);
   }
-  var match$2 = props[/* onClick */2];
+  var match$2 = props[/* onClick */4];
   if (match$2) {
     domElement.addEventListener("click", match$2[0]);
   }
-  var match$3 = props[/* onChange */3];
+  var match$3 = props[/* onKeyDown */5];
   if (match$3) {
-    domElement.addEventListener("change", match$3[0]);
+    domElement.addEventListener("keyDown", match$3[0]);
+  }
+  var match$4 = props[/* onChange */6];
+  if (match$4) {
+    domElement.addEventListener("input", match$4[0]);
+  }
+  var match$5 = props[/* className */2];
+  if (match$5) {
+    domElement.setAttribute("class", match$5[0]);
+  }
+  var match$6 = props[/* placeholder */3];
+  if (match$6) {
+    domElement.setAttribute("placeholder", match$6[0]);
     return /* () */0;
   } else {
     return /* () */0;
@@ -98,6 +110,46 @@ function instantiate(element) {
   return instance;
 }
 
+function createInstance(component, element) {
+  var iState = Curry._1(component[/* initialState */2], /* () */0);
+  return /* Instance */[/* record */[
+            /* component */component,
+            /* iState */iState,
+            /* element */element,
+            /* childInstance */[/* None */0],
+            /* dom */[document.createElement("span")],
+            /* pendingStateUpdates */[/* [] */0]
+          ]];
+}
+
+function createSelf(instance) {
+  var instance$1 = instance[0];
+  return /* record */[
+          /* state */instance$1[/* iState */1],
+          /* reduce */(function (payloadToAction, payload) {
+              var action = Curry._1(payloadToAction, payload);
+              var stateUpdate = Curry._1(instance$1[/* component */0][/* reducer */3], action);
+              instance$1[/* pendingStateUpdates */5][0] = /* :: */[
+                stateUpdate,
+                instance$1[/* pendingStateUpdates */5][0]
+              ];
+              return /* () */0;
+            }),
+          /* send */(function (action) {
+              var match = Curry._2(instance$1[/* component */0][/* reducer */3], action, instance$1[/* iState */1]);
+              var stateUpdate = match ? match[0] : instance$1[/* iState */1];
+              var match$1 = instance$1[/* dom */4][0].parentNode;
+              if (match$1 !== null) {
+                var newrecord = instance$1.slice();
+                reconcile(match$1, /* Some */[/* ComponentInstance */Block.__(1, [/* Instance */[(newrecord[/* iState */1] = stateUpdate, newrecord)]])], /* Some */[instance$1[/* element */2]]);
+                return /* () */0;
+              } else {
+                return /* () */0;
+              }
+            })
+        ];
+}
+
 function reconcile(parentDom, instance, didactElement) {
   var reconcilerImpl = function (parentDom, instance, didactElement) {
     if (instance) {
@@ -148,46 +200,6 @@ function reconcile(parentDom, instance, didactElement) {
     }
   };
   return reconcilerImpl(parentDom, instance, didactElement);
-}
-
-function createSelf(instance) {
-  var instance$1 = instance[0];
-  return /* record */[
-          /* state */instance$1[/* iState */1],
-          /* reduce */(function (payloadToAction, payload) {
-              var action = Curry._1(payloadToAction, payload);
-              var stateUpdate = Curry._1(instance$1[/* component */0][/* reducer */3], action);
-              instance$1[/* pendingStateUpdates */5][0] = /* :: */[
-                stateUpdate,
-                instance$1[/* pendingStateUpdates */5][0]
-              ];
-              return /* () */0;
-            }),
-          /* send */(function (action) {
-              var match = Curry._2(instance$1[/* component */0][/* reducer */3], action, instance$1[/* iState */1]);
-              var stateUpdate = match ? match[0] : instance$1[/* iState */1];
-              var match$1 = instance$1[/* dom */4][0].parentNode;
-              if (match$1 !== null) {
-                var newrecord = instance$1.slice();
-                reconcile(match$1, /* Some */[/* ComponentInstance */Block.__(1, [/* Instance */[(newrecord[/* iState */1] = stateUpdate, newrecord)]])], /* Some */[instance$1[/* element */2]]);
-                return /* () */0;
-              } else {
-                return /* () */0;
-              }
-            })
-        ];
-}
-
-function createInstance(component, element) {
-  var iState = Curry._1(component[/* initialState */2], /* () */0);
-  return /* Instance */[/* record */[
-            /* component */component,
-            /* iState */iState,
-            /* element */element,
-            /* childInstance */[/* None */0],
-            /* dom */[document.createElement("span")],
-            /* pendingStateUpdates */[/* [] */0]
-          ]];
 }
 
 function reconcileChildren(instance, didactElement) {

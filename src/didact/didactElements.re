@@ -25,3 +25,7 @@ let img = createDomElement("img");
 let button = createDomElement("button");
 
 let input = createDomElement("input");
+
+let header = createDomElement("header");
+
+let section = createDomElement("section");

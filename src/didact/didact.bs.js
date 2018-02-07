@@ -22,18 +22,24 @@ var Callback = /* module */[
 var defaultProps = /* record */[
   /* id : None */0,
   /* value : None */0,
+  /* className : None */0,
+  /* placeholder : None */0,
   /* onClick : None */0,
+  /* onKeyDown : None */0,
   /* onChange : None */0
 ];
 
-function createDomElement(name, onClick, children, _) {
+function createDomElement(name, onClick, onChange, onKeyDown, id, value, className, placeholder, children, _) {
   return /* record */[
           /* elementType : Node */Block.__(1, [name]),
           /* props : record */[
-            /* id : None */0,
-            /* value : None */0,
+            /* id */id,
+            /* value */value,
+            /* className */className,
+            /* placeholder */placeholder,
             /* onClick */onClick,
-            /* onChange : None */0
+            /* onKeyDown */onKeyDown,
+            /* onChange */onChange
           ],
           /* children */children
         ];
@@ -47,7 +53,7 @@ function basicComponent(debugName) {
                     Caml_builtin_exceptions.assert_failure,
                     [
                       "didact.re",
-                      70,
+                      92,
                       19
                     ]
                   ];
@@ -85,6 +91,22 @@ function stringToElement(value) {
         ];
 }
 
+function listToElement(elements) {
+  return /* record */[
+          /* elementType : Node */Block.__(1, ["div"]),
+          /* props */defaultProps,
+          /* children */elements
+        ];
+}
+
+var nullElement_000 = /* elementType : Node */Block.__(1, ["div"]);
+
+var nullElement = /* record */[
+  nullElement_000,
+  /* props */defaultProps,
+  /* children : [] */0
+];
+
 function component(component$1) {
   return /* record */[
           /* elementType : Component */Block.__(2, [component$1]),
@@ -101,5 +123,7 @@ exports.statelessComponent = statelessComponent;
 exports.statefulComponent  = statefulComponent;
 exports.reducerComponent   = reducerComponent;
 exports.stringToElement    = stringToElement;
+exports.listToElement      = listToElement;
+exports.nullElement        = nullElement;
 exports.component          = component;
 /* No side effect */
