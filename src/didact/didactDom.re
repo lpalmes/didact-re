@@ -20,8 +20,38 @@ and didactInstance =
   | ComponentInstance(componentInstance);
 
 module Reconciler = {
-  let addProps = (domElement: Dom.element, props) => {
+  let addProps = (domElement: Dom.element, prevProps: option(props), props: props) => {
     open Webapi.Dom;
+    /* remove attributes */
+    switch props.id {
+    | Some(_) => ElementRe.removeAttribute("id", domElement)
+    | None => ()
+    };
+    switch props.value {
+    | Some(_) => ElementRe.removeAttribute("value", domElement)
+    | None => ()
+    };
+    switch props.onClick {
+    | Some(func) => Element.removeEventListener("click", func, domElement)
+    | None => ()
+    };
+    switch props.onKeyDown {
+    | Some(func) => Element.removeEventListener("keyDown", func, domElement)
+    | None => ()
+    };
+    switch props.onChange {
+    | Some(func) => Element.removeEventListener("input", func, domElement)
+    | None => ()
+    };
+    switch props.className {
+    | Some(_) => ElementRe.removeAttribute("class", domElement)
+    | None => ()
+    };
+    switch props.placeholder {
+    | Some(_) => ElementRe.removeAttribute("placeholder", domElement)
+    | None => ()
+    };
+    /* add attributes */
     switch props.id {
     | Some(value) => ElementRe.setAttribute("id", value, domElement)
     | None => ()
@@ -96,7 +126,7 @@ module Reconciler = {
         ComponentInstance(instance);
       };
     switch instance {
-    | NodeInstance({dom}) => addProps(dom, element.props)
+    | NodeInstance({dom}) => addProps(dom, None, element.props)
     | _ => ()
     };
     instance;
@@ -122,23 +152,39 @@ module Reconciler = {
         | (Some(instance), None) =>
           Element.removeChild(domFromInstance(instance), parentDom) |> ignore;
           None;
-        /* | (Some(NodeInstance({element} as instance)), Some(didactElement))
-             when element.elementType == didactElement.elementType =>
-           Some(NodeInstance({...instance, element: didactElement})) */
         | (
-            Some(ComponentInstance(instance)),
-            Some({elementType: Component(component)})
+            Some(NodeInstance({dom, element: {elementType: Text(oldText)}} as instance)) as opInstance,
+            Some({elementType: Text(newText)} as element)
           ) =>
+          if (oldText == newText) {
+            opInstance;
+          } else {
+            Element.setInnerText(dom, newText);
+            Some(NodeInstance({...instance, element}));
+          }
+        | (Some(ComponentInstance(instance)), Some({elementType: Component(component)})) =>
+          Js.log("Same component instance");
           let self = createSelf(Obj.magic(instance));
           let element = component.render(Obj.magic(self));
           let Instance({dom, childInstance}) = instance;
-          childInstance :=
-            reconcilerImpl(parentDom, childInstance^, Some(element));
+          childInstance := reconcilerImpl(parentDom, childInstance^, Some(element));
           switch childInstance^ {
           | Some(c) => dom := domFromInstance(c)
           | _ => ()
           };
           Some(ComponentInstance(instance));
+        | (
+            Some(
+              NodeInstance(
+                {element: {elementType: Node(oldValue), props: oldProps} as element, dom} as instance
+              )
+            ),
+            Some({elementType: Node(newValue), props: newProps})
+          )
+            when oldValue == newValue =>
+          addProps(dom, Some(oldProps), newProps);
+          let childInstances = List.rev(reconcileChildren(instance, element));
+          Some(NodeInstance({...instance, childInstances}));
         | (Some(instance), Some(didactElement)) =>
           let newInstance = instantiate(didactElement);
           Element.removeChild(domFromInstance(instance), parentDom) |> ignore;
@@ -152,17 +198,19 @@ module Reconciler = {
   and reconcileChildren =
       (instance: nodeInstance, didactElement: didactElement)
       : list(didactInstance) => {
-    let (a, b) =
-      equalizeLists(instance.childInstances, didactElement.children);
-    List.map2(reconcile(instance.dom), a, b)
-    |> List.fold_left(
-         (a, b) =>
-           switch b {
-           | Some(x) => [x, ...a]
-           | None => a
-           },
-         []
-       );
+    let (a, b) = equalizeLists(instance.childInstances, didactElement.children);
+    let childOptionalInstances = List.map2(reconcile(instance.dom), a, b);
+    let instances =
+      List.fold_left(
+        (a, b) =>
+          switch b {
+          | Some(x) => [x, ...a]
+          | None => a
+          },
+        [],
+        childOptionalInstances
+      );
+    instances;
   }
   and createSelf = instance : self(_) => {
     let Instance(instance) = instance;
@@ -171,14 +219,11 @@ module Reconciler = {
       reduce: (payloadToAction, payload) => {
         let action = payloadToAction(payload);
         let stateUpdate = instance.component.reducer(Obj.magic(action));
-        instance.pendingStateUpdates :=
-          [stateUpdate, ...instance.pendingStateUpdates^];
+        instance.pendingStateUpdates := [stateUpdate, ...instance.pendingStateUpdates^];
       },
       send: action => {
         let stateUpdate =
-          switch (
-            instance.component.reducer(Obj.magic(action), instance.iState)
-          ) {
+          switch (instance.component.reducer(Obj.magic(action), instance.iState)) {
           | NoUpdate => instance.iState
           | Update(newState) => newState
           };
@@ -186,9 +231,7 @@ module Reconciler = {
         | Some(dom) =>
           reconcile(
             Obj.magic(dom),
-            Some(
-              ComponentInstance(Instance({...instance, iState: stateUpdate}))
-            ),
+            Some(ComponentInstance(Instance({...instance, iState: stateUpdate}))),
             Some(instance.element)
           )
           |> ignore
@@ -217,3 +260,6 @@ let render = (element, parentDom) => {
   instance := newInstance;
   newInstance;
 };
+
+let hotUpdate = (element, parentDom, oldInstance) =>
+  instance := Reconciler.reconcile(parentDom, oldInstance, Some(element));

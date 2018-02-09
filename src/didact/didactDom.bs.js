@@ -5,34 +5,62 @@ var List  = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 
-function addProps(domElement, props) {
+function addProps(domElement, _, props) {
   var match = props[/* id */0];
   if (match) {
-    domElement.setAttribute("id", match[0]);
+    domElement.removeAttribute("id");
   }
   var match$1 = props[/* value */1];
   if (match$1) {
-    domElement.setAttribute("value", match$1[0]);
+    domElement.removeAttribute("value");
   }
   var match$2 = props[/* onClick */4];
   if (match$2) {
-    domElement.addEventListener("click", match$2[0]);
+    domElement.removeEventListener("click", match$2[0]);
   }
   var match$3 = props[/* onKeyDown */5];
   if (match$3) {
-    domElement.addEventListener("keyDown", match$3[0]);
+    domElement.removeEventListener("keyDown", match$3[0]);
   }
   var match$4 = props[/* onChange */6];
   if (match$4) {
-    domElement.addEventListener("input", match$4[0]);
+    domElement.removeEventListener("input", match$4[0]);
   }
   var match$5 = props[/* className */2];
   if (match$5) {
-    domElement.setAttribute("class", match$5[0]);
+    domElement.removeAttribute("class");
   }
   var match$6 = props[/* placeholder */3];
   if (match$6) {
-    domElement.setAttribute("placeholder", match$6[0]);
+    domElement.removeAttribute("placeholder");
+  }
+  var match$7 = props[/* id */0];
+  if (match$7) {
+    domElement.setAttribute("id", match$7[0]);
+  }
+  var match$8 = props[/* value */1];
+  if (match$8) {
+    domElement.setAttribute("value", match$8[0]);
+  }
+  var match$9 = props[/* onClick */4];
+  if (match$9) {
+    domElement.addEventListener("click", match$9[0]);
+  }
+  var match$10 = props[/* onKeyDown */5];
+  if (match$10) {
+    domElement.addEventListener("keyDown", match$10[0]);
+  }
+  var match$11 = props[/* onChange */6];
+  if (match$11) {
+    domElement.addEventListener("input", match$11[0]);
+  }
+  var match$12 = props[/* className */2];
+  if (match$12) {
+    domElement.setAttribute("class", match$12[0]);
+  }
+  var match$13 = props[/* placeholder */3];
+  if (match$13) {
+    domElement.setAttribute("placeholder", match$13[0]);
     return /* () */0;
   } else {
     return /* () */0;
@@ -105,21 +133,135 @@ function instantiate(element) {
     
   }
   if (!instance.tag) {
-    addProps(instance[0][/* dom */1], element[/* props */1]);
+    addProps(instance[0][/* dom */1], /* None */0, element[/* props */1]);
   }
   return instance;
 }
 
-function createInstance(component, element) {
-  var iState = Curry._1(component[/* initialState */2], /* () */0);
-  return /* Instance */[/* record */[
-            /* component */component,
-            /* iState */iState,
-            /* element */element,
-            /* childInstance */[/* None */0],
-            /* dom */[document.createElement("span")],
-            /* pendingStateUpdates */[/* [] */0]
-          ]];
+function reconcile(parentDom, instance, didactElement) {
+  var reconcilerImpl = function (parentDom, instance, didactElement) {
+    if (instance) {
+      var instance$1 = instance[0];
+      var exit = 0;
+      if (didactElement) {
+        if (instance$1.tag) {
+          var match = didactElement[0][/* elementType */0];
+          var instance$2 = instance$1[0];
+          switch (match.tag | 0) {
+            case 0 : 
+            case 1 : 
+                exit = 1;
+                break;
+            case 2 : 
+                console.log("Same component instance");
+                var self = createSelf(instance$2);
+                var element = Curry._1(match[0][/* render */1], self);
+                var match$1 = instance$2[0];
+                var childInstance = match$1[/* childInstance */3];
+                childInstance[0] = reconcilerImpl(parentDom, childInstance[0], /* Some */[element]);
+                var match$2 = childInstance[0];
+                if (match$2) {
+                  match$1[/* dom */4][0] = domFromInstance(match$2[0]);
+                }
+                return /* Some */[/* ComponentInstance */Block.__(1, [instance$2])];
+            
+          }
+        } else {
+          var instance$3 = instance$1[0];
+          var element$1 = instance$3[/* element */0];
+          var match$3 = element$1[/* elementType */0];
+          switch (match$3.tag | 0) {
+            case 0 : 
+                var element$2 = didactElement[0];
+                var match$4 = element$2[/* elementType */0];
+                switch (match$4.tag | 0) {
+                  case 0 : 
+                      var newText = match$4[0];
+                      if (match$3[0] === newText) {
+                        return instance;
+                      } else {
+                        instance$3[/* dom */1].innerText = newText;
+                        return /* Some */[/* NodeInstance */Block.__(0, [/* record */[
+                                      /* element */element$2,
+                                      /* dom */instance$3[/* dom */1],
+                                      /* childInstances */instance$3[/* childInstances */2]
+                                    ]])];
+                      }
+                  case 1 : 
+                  case 2 : 
+                      exit = 1;
+                      break;
+                  
+                }
+                break;
+            case 1 : 
+                var match$5 = didactElement[0];
+                var match$6 = match$5[/* elementType */0];
+                switch (match$6.tag | 0) {
+                  case 1 : 
+                      if (match$3[0] === match$6[0]) {
+                        addProps(instance$3[/* dom */1], /* Some */[element$1[/* props */1]], match$5[/* props */1]);
+                        var childInstances = List.rev(reconcileChildren(instance$3, element$1));
+                        return /* Some */[/* NodeInstance */Block.__(0, [/* record */[
+                                      /* element */instance$3[/* element */0],
+                                      /* dom */instance$3[/* dom */1],
+                                      /* childInstances */childInstances
+                                    ]])];
+                      } else {
+                        exit = 1;
+                      }
+                      break;
+                  case 0 : 
+                  case 2 : 
+                      exit = 1;
+                      break;
+                  
+                }
+                break;
+            case 2 : 
+                exit = 1;
+                break;
+            
+          }
+        }
+      } else {
+        parentDom.removeChild(domFromInstance(instance$1));
+        return /* None */0;
+      }
+      if (exit === 1) {
+        var newInstance = instantiate(didactElement[0]);
+        parentDom.removeChild(domFromInstance(instance$1));
+        parentDom.appendChild(domFromInstance(newInstance));
+        return /* Some */[newInstance];
+      }
+      
+    } else if (didactElement) {
+      var newInstance$1 = instantiate(didactElement[0]);
+      parentDom.appendChild(domFromInstance(newInstance$1));
+      return /* Some */[newInstance$1];
+    } else {
+      return /* None */0;
+    }
+  };
+  return reconcilerImpl(parentDom, instance, didactElement);
+}
+
+function reconcileChildren(instance, didactElement) {
+  var match = equalizeLists(instance[/* childInstances */2], didactElement[/* children */2]);
+  var partial_arg = instance[/* dom */1];
+  var childOptionalInstances = List.map2((function (param, param$1) {
+          return reconcile(partial_arg, param, param$1);
+        }), match[0], match[1]);
+  return List.fold_left((function (a, b) {
+                if (b) {
+                  return /* :: */[
+                          b[0],
+                          a
+                        ];
+                } else {
+                  return a;
+                }
+              }), /* [] */0, childOptionalInstances);
 }
 
 function createSelf(instance) {
@@ -150,73 +292,16 @@ function createSelf(instance) {
         ];
 }
 
-function reconcile(parentDom, instance, didactElement) {
-  var reconcilerImpl = function (parentDom, instance, didactElement) {
-    if (instance) {
-      var instance$1 = instance[0];
-      var exit = 0;
-      if (didactElement) {
-        if (instance$1.tag) {
-          var match = didactElement[0][/* elementType */0];
-          var instance$2 = instance$1[0];
-          switch (match.tag | 0) {
-            case 0 : 
-            case 1 : 
-                exit = 1;
-                break;
-            case 2 : 
-                var self = createSelf(instance$2);
-                var element = Curry._1(match[0][/* render */1], self);
-                var match$1 = instance$2[0];
-                var childInstance = match$1[/* childInstance */3];
-                childInstance[0] = reconcilerImpl(parentDom, childInstance[0], /* Some */[element]);
-                var match$2 = childInstance[0];
-                if (match$2) {
-                  match$1[/* dom */4][0] = domFromInstance(match$2[0]);
-                }
-                return /* Some */[/* ComponentInstance */Block.__(1, [instance$2])];
-            
-          }
-        } else {
-          exit = 1;
-        }
-      } else {
-        parentDom.removeChild(domFromInstance(instance$1));
-        return /* None */0;
-      }
-      if (exit === 1) {
-        var newInstance = instantiate(didactElement[0]);
-        parentDom.removeChild(domFromInstance(instance$1));
-        parentDom.appendChild(domFromInstance(newInstance));
-        return /* Some */[newInstance];
-      }
-      
-    } else if (didactElement) {
-      var newInstance$1 = instantiate(didactElement[0]);
-      parentDom.appendChild(domFromInstance(newInstance$1));
-      return /* Some */[newInstance$1];
-    } else {
-      return /* None */0;
-    }
-  };
-  return reconcilerImpl(parentDom, instance, didactElement);
-}
-
-function reconcileChildren(instance, didactElement) {
-  var match = equalizeLists(instance[/* childInstances */2], didactElement[/* children */2]);
-  var partial_arg = instance[/* dom */1];
-  return List.fold_left((function (a, b) {
-                if (b) {
-                  return /* :: */[
-                          b[0],
-                          a
-                        ];
-                } else {
-                  return a;
-                }
-              }), /* [] */0, List.map2((function (param, param$1) {
-                    return reconcile(partial_arg, param, param$1);
-                  }), match[0], match[1]));
+function createInstance(component, element) {
+  var iState = Curry._1(component[/* initialState */2], /* () */0);
+  return /* Instance */[/* record */[
+            /* component */component,
+            /* iState */iState,
+            /* element */element,
+            /* childInstance */[/* None */0],
+            /* dom */[document.createElement("span")],
+            /* pendingStateUpdates */[/* [] */0]
+          ]];
 }
 
 var Reconciler = /* module */[
@@ -238,7 +323,13 @@ function render(element, parentDom) {
   return newInstance;
 }
 
+function hotUpdate(element, parentDom, oldInstance) {
+  instance[0] = reconcile(parentDom, oldInstance, /* Some */[element]);
+  return /* () */0;
+}
+
 exports.Reconciler = Reconciler;
 exports.instance   = instance;
 exports.render     = render;
+exports.hotUpdate  = hotUpdate;
 /* No side effect */
